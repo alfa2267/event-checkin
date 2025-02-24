@@ -1,4 +1,4 @@
-import {useState } from 'react';
+import { useState } from 'react';
 import "@radix-ui/themes/styles.css";
 import { 
   Card, 
@@ -115,19 +115,22 @@ export const EventManager: React.FC = () => {
     plusOnes: guests.filter(g => g.plusOne).length
   };
 
-  // NFC Scanning Simulation
-  const simulateNFCScan = async () => {
+  // NFC Scanning logic (no simulation)
+  const startScanning = async () => {
     setScanning(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Here, you would interface with your device's NFC API
+      // Assuming a successful scan, set the tag info
+      const tag: NFCTag = {
+        serialNumber: "04:XX:YY:ZZ:AA", // Example serial number
+        assignedTo: null,
+        data: {} // Additional data from the tag can be added
+      };
+      setCurrentNfcTag(tag);
+    } catch (error) {
+      console.error("Error scanning NFC tag:", error);
+    }
     setScanning(false);
-    
-    const newTag = { 
-      serialNumber: "04:XX:YY:ZZ:AA", 
-      assignedTo: null, 
-      data: null 
-    };
-    
-    setCurrentNfcTag(newTag);
   };
 
   // Filtering and Searching
@@ -141,7 +144,7 @@ export const EventManager: React.FC = () => {
   const CheckInTab = () => (
     <Flex direction="column" gap="4">
       <Button 
-        onClick={simulateNFCScan} 
+        onClick={startScanning} 
         disabled={scanning}
         style={{ width: '100%' }}
       >
@@ -159,15 +162,15 @@ export const EventManager: React.FC = () => {
       </Button>
       
       <Card>
-          {guests.filter(g => g.checkedIn).slice(0, 3).map(guest => (
-            <Flex key={guest.id} justify="between" align="center" py="2" style={{ borderBottom: '1px solid var(--gray-a2)' }}>
-              <Flex direction="column">
-                <Text as="div">{guest.firstName} {guest.lastName}</Text>
-                <Text as="div" color="gray" size="1">NFC Tag: {guest.nfcTag}</Text>
-              </Flex>
-              <CheckCircledIcon color="green" />
+        {guests.filter(g => g.checkedIn).slice(0, 3).map(guest => (
+          <Flex key={guest.id} justify="between" align="center" py="2" style={{ borderBottom: '1px solid var(--gray-a2)' }}>
+            <Flex direction="column">
+              <Text as="div">{guest.firstName} {guest.lastName}</Text>
+              <Text as="div" color="gray" size="1">NFC Tag: {guest.nfcTag}</Text>
             </Flex>
-          ))}
+            <CheckCircledIcon color="green" />
+          </Flex>
+        ))}
       </Card>
     </Flex>
   );
@@ -178,7 +181,6 @@ export const EventManager: React.FC = () => {
       <Flex gap="2">
         <TextField.Root style={{ flexGrow: 1 }} placeholder="Search guests..." >
           <TextField.Slot 
-           
             onChange={(e) => setSearchTerm(e.currentTarget.nodeValue)}
           />
         </TextField.Root>
@@ -200,24 +202,24 @@ export const EventManager: React.FC = () => {
               opacity: guest.checkedIn ? 0.6 : 1,
             }}
           >
-              <Flex justify="between" align="center">
-                <Flex direction="column">
-                  <Text as="div" weight="bold">{guest.firstName} {guest.lastName}</Text>
-                  <Text as="div" color="gray" size="1">
-                    Table: {guest.tableNumber} | 
-                    Status: {guest.checkedIn ? 'Checked In' : 'Not Checked In'}
-                  </Text>
-                  {guest.nfcTag && (
-                    <Text as="div" color="gray" size="1">NFC Tag: {guest.nfcTag}</Text>
-                  )}
-                </Flex>
-                <Button 
-                  size="1" 
-                  variant={guest.souvenirReceived ? "soft" : "solid"}
-                >
-                  {guest.souvenirReceived ? 'Given' : 'Give Souvenir'}
-                </Button>
+            <Flex justify="between" align="center">
+              <Flex direction="column">
+                <Text as="div" weight="bold">{guest.firstName} {guest.lastName}</Text>
+                <Text as="div" color="gray" size="1">
+                  Table: {guest.tableNumber} | 
+                  Status: {guest.checkedIn ? 'Checked In' : 'Not Checked In'}
+                </Text>
+                {guest.nfcTag && (
+                  <Text as="div" color="gray" size="1">NFC Tag: {guest.nfcTag}</Text>
+                )}
               </Flex>
+              <Button 
+                size="1" 
+                variant={guest.souvenirReceived ? "soft" : "solid"}
+              >
+                {guest.souvenirReceived ? 'Given' : 'Give Souvenir'}
+              </Button>
+            </Flex>
           </Card>
         ))}
       </Flex>
@@ -228,38 +230,37 @@ export const EventManager: React.FC = () => {
   const DashboardTab = () => (
     <Flex direction="column" gap="4">
       <Card>
-          <Grid columns="2" gap="4">
-            <Flex direction="column">
-              <Text color="gray" size="1">Total Guests</Text>
-              <Text size="6" weight="bold">{stats.totalGuests}</Text>
-            </Flex>
-            <Flex direction="column">
-              <Text color="gray" size="1">Checked In</Text>
-              <Text size="6" weight="bold">{stats.checkedIn}</Text>
-            </Flex>
-            <Flex direction="column">
-              <Text color="gray" size="1">Online RSVPs</Text>
-              <Text size="6" weight="bold">{stats.onlineRSVP}</Text>
-            </Flex>
-            <Flex direction="column">
-              <Text color="gray" size="1">Plus Ones</Text>
-              <Text size="6" weight="bold">{stats.plusOnes}</Text>
-            </Flex>
-          </Grid>
-        
+        <Grid columns="2" gap="4">
+          <Flex direction="column">
+            <Text color="gray" size="1">Total Guests</Text>
+            <Text size="6" weight="bold">{stats.totalGuests}</Text>
+          </Flex>
+          <Flex direction="column">
+            <Text color="gray" size="1">Checked In</Text>
+            <Text size="6" weight="bold">{stats.checkedIn}</Text>
+          </Flex>
+          <Flex direction="column">
+            <Text color="gray" size="1">Online RSVPs</Text>
+            <Text size="6" weight="bold">{stats.onlineRSVP}</Text>
+          </Flex>
+          <Flex direction="column">
+            <Text color="gray" size="1">Plus Ones</Text>
+            <Text size="6" weight="bold">{stats.plusOnes}</Text>
+          </Flex>
+        </Grid>
       </Card>
       
       <Card>
-          <Flex justify="between">
-            <Flex direction="column">
-              <Text color="gray" size="1">Souvenirs Given</Text>
-              <Text size="6" weight="bold">{stats.souvenirGiven}</Text>
-            </Flex>
-            <Flex direction="column">
-              <Text color="gray" size="1">Remaining</Text>
-              <Text size="6" weight="bold">{stats.totalGuests - stats.souvenirGiven}</Text>
-            </Flex>
+        <Flex justify="between">
+          <Flex direction="column">
+            <Text color="gray" size="1">Souvenirs Given</Text>
+            <Text size="6" weight="bold">{stats.souvenirGiven}</Text>
           </Flex>
+          <Flex direction="column">
+            <Text color="gray" size="1">Remaining</Text>
+            <Text size="6" weight="bold">{stats.totalGuests - stats.souvenirGiven}</Text>
+          </Flex>
+        </Flex>
       </Card>
     </Flex>
   );
@@ -268,52 +269,33 @@ export const EventManager: React.FC = () => {
     <Theme>
       <Flex direction="column" maxWidth="480px">
         <Card>
-            <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-              <Tabs.List>
-                <Tabs.Trigger value="check-in">
-                  <PersonIcon /> Check-in
-                </Tabs.Trigger>
-                <Tabs.Trigger value="guest-list">
-                  <MagnifyingGlassIcon /> Guests
-                </Tabs.Trigger>
-                <Tabs.Trigger value="dashboard">
-                  <CreditCardIcon /> Dashboard
-                </Tabs.Trigger>
-                <Tabs.Trigger value="souvenirs">
-                  <GiftIcon /> Souvenirs
-                </Tabs.Trigger>
-              </Tabs.List>
-              
-              <Tabs.Content value="check-in">
-                <CheckInTab />
-              </Tabs.Content>
-              <Tabs.Content value="guest-list">
-                <GuestListTab />
-              </Tabs.Content>
-              <Tabs.Content value="dashboard">
-                <DashboardTab />
-              </Tabs.Content>
-              <Tabs.Content value="souvenirs">
-                <Text>Souvenir management coming soon!</Text>
-              </Tabs.Content>
-            </Tabs.Root>
-         
+          <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Trigger value="check-in">
+                <PersonIcon /> Check-in
+              </Tabs.Trigger>
+              <Tabs.Trigger value="guest-list">
+                <MagnifyingGlassIcon /> Guests
+              </Tabs.Trigger>
+              <Tabs.Trigger value="dashboard">
+                <CreditCardIcon /> Dashboard
+              </Tabs.Trigger>
+              <Tabs.Trigger value="souvenirs">
+                <GiftIcon /> Souvenirs
+              </Tabs.Trigger>
+            </Tabs.List>
+            
+            <Tabs.Content value="check-in">
+              <CheckInTab />
+            </Tabs.Content>
+            <Tabs.Content value="guest-list">
+              <GuestListTab />
+            </Tabs.Content>
+            <Tabs.Content value="dashboard">
+              <DashboardTab />
+            </Tabs.Content>
+          </Tabs.Root>
         </Card>
-
-        {currentNfcTag && (
-          <Dialog.Root open={!!currentNfcTag} onOpenChange={() => setCurrentNfcTag(null)}>
-            <Dialog.Content>
-              <Dialog.Title>NFC Tag Detected</Dialog.Title>
-              <Dialog.Description>
-                Serial Number: {currentNfcTag.serialNumber}
-              </Dialog.Description>
-              <Flex direction="column" gap="2">
-                <Button variant="outline">Assign to Main Guest</Button>
-                <Button variant="outline">Assign to Plus One</Button>
-              </Flex>
-            </Dialog.Content>
-          </Dialog.Root>
-        )}
       </Flex>
     </Theme>
   );
